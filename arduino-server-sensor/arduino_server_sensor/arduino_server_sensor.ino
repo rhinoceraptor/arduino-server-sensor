@@ -24,13 +24,13 @@ DHT dht_four(DHT_FOUR, DHT_TYPE);
 static byte mac[] = {0x00, 0x19, 0xC5, 0xE5, 0x80, 0x1F};
 static byte ip[] = {192, 168, 1, 37};
 
-byte Ethernet::buffer[500];
+byte Ethernet::buffer[1000];
 BufferFiller bfill;
 
-float dht_val_one[] = {0.0, 0.0, 0.0};
-float dht_val_two[] = {0.0, 0.0, 0.0};
-float dht_val_three[] = {0.0, 0.0, 0.0};
-float dht_val_four[] = {0.0, 0.0, 0.0};
+int dht_val_one[] = {0, 0, 0};
+int dht_val_two[] = {0, 0, 0};
+int dht_val_three[] = {0, 0, 0};
+int dht_val_four[] = {0, 0, 0};
 
 unsigned long last_data = 0;
 unsigned long data_interval = 3000;
@@ -47,16 +47,16 @@ void setup()
 }
 
 /* General function for printing temp data for the given dht */
-void get_data(DHT dht, float values[])
+void get_data(DHT dht, int values[])
 {
   /* 
    * index 0: humidity
    * index 1: Calcius
    * index 2: Fahrenheight
    */
-  values[0] = dht.readHumidity();
-  values[1] = dht.readTemperature();
-  values[2] = dht.readTemperature(true);
+  values[0] = (int) (dht.readHumidity() + 0.5);
+  values[1] = (int) (dht.readTemperature() + 0.5);
+  values[2] = (int) (dht.readTemperature(true) + 0.5);
 
   if (isnan(values[0]) || isnan(values[1]) || isnan(values[2])) 
   {
@@ -89,26 +89,29 @@ static word show_temps()
 {
   bfill = ether.tcpOffset();
   bfill.emit_p(PSTR(
+    "HTTP/1.0 200 OK\r\n"
+    "Content-Type: text/json\r\n"
+    "\r\n"
     "{\r\n"
     "  \"sensor one\": {\r\n"
-    "    \"humidity\": \"$T\",\r\n"
-    "    \"celcius\": \"$T\",\r\n"
-    "    \"fahrenheit\": \"$T\"\r\n"
+    "    \"humidity\": \"$D\",\r\n"
+    "    \"celcius\": \"$D\",\r\n"
+    "    \"fahrenheit\": \"$D\"\r\n"
     "  },\r\n"
     "  \"sensor two\": {\r\n"
-    "    \"humidity\": \"$T\",\r\n"
-    "    \"celcius\": \"$T\",\r\n"
-    "    \"fahrenheit\": \"$T\"\r\n"
+    "    \"humidity\": \"$D\",\r\n"
+    "    \"celcius\": \"$D\",\r\n"
+    "    \"fahrenheit\": \"$D\"\r\n"
     "  },\r\n"
     "  \"sensor three\": {\r\n"
-    "    \"humidity\": \"$T\",\r\n"
-    "    \"celcius\": \"$T\",\r\n"
-    "    \"fahrenheit\": \"$T\"\r\n"
+    "    \"humidity\": \"$D\",\r\n"
+    "    \"celcius\": \"$D\",\r\n"
+    "    \"fahrenheit\": \"$D\"\r\n"
     "  },\r\n"
     "  \"sensor four\": {\r\n"
-    "    \"humidity\": \"$T\",\r\n"
-    "    \"celcius\": \"$T\",\r\n"
-    "    \"fahrenheit\": \"$T\"\r\n"
+    "    \"humidity\": \"$D\",\r\n"
+    "    \"celcius\": \"$D\",\r\n"
+    "    \"fahrenheit\": \"$D\"\r\n"
     "  }\r\n"
     "}\r\n"
     ), dht_val_one[0], dht_val_one[1], dht_val_one[2],
